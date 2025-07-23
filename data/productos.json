@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "nombre": "Auricular Gamer 1",
+    "precio": 12000,
+    "imagen": "assets/auricular1.jpg"
+  },
+  {
+    "id": 2,
+    "nombre": "Auricular Gamer 2",
+    "precio": 15000,
+    "imagen": "assets/auricular2.jpg"
+  },
+  {
+    "id": 3,
+    "nombre": "Mouse Gamer 1",
+    "precio": 9000,
+    "imagen": "assets/mouse1.jpg"
+  },
+  {
+    "id": 4,
+    "nombre": "Mouse Gamer 2",
+    "precio": 9500,
+    "imagen": "assets/mouse2.jpg"
+  },
+  {
+    "id": 5,
+    "nombre": "Teclado Mecánico 1",
+    "precio": 18000,
+    "imagen": "assets/teclado1.jpg"
+  },
+  {
+    "id": 6,
+    "nombre": "Teclado Mecánico 2",
+    "precio": 20000,
+    "imagen": "assets/teclado2.jpg"
+  },
+  {
+    "id": 7,
+    "nombre": "Banner Promocional",
+    "precio": 0,
+    "imagen": "assets/banner.jpg"
+  }
+]

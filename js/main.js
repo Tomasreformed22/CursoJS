@@ -1,99 +1,135 @@
-const preguntas = [
-  {
-    pregunta: "🧙‍♂️ ¿Cuál de estos campeones es un mago?",
-    opciones: ["Lux", "Garen", "Lee Sin"],
-    correcta: 0
-  },
-  {
-    pregunta: "⚔️ ¿Qué línea suele jugar Jhin?",
-    opciones: ["Top", "Mid", "Bot"],
-    correcta: 2
-  },
-  {
-    pregunta: "🐉 ¿Qué dragón otorga velocidad de movimiento permanente?",
-    opciones: ["Dragón de viento", "Dragón de fuego", "Dragón de océano"],
-    correcta: 0
-  },
-  {
-    pregunta: "👑 ¿Cuál es el rol principal de Thresh?",
-    opciones: ["Soporte", "Asesino", "Tirador"],
-    correcta: 0
-  },
-  {
-    pregunta: "🛡️ ¿Qué objeto otorga escudo a los aliados?",
-    opciones: ["Espada del Rey Arruinado", "Redención", "Filo Infinito"],
-    correcta: 1
-  }
-];
+import { obtenerProductos, mostrarToast } from "./fetchData.js";
 
-let indicePregunta = 0;
-let puntaje = 0;
+let carrito = [];
+let usuario = "";
 
-const contenedor = document.getElementById("pregunta-container");
-const resultado = document.getElementById("resultado");
-const btnReiniciar = document.getElementById("reiniciar");
-const btnBorrar = document.getElementById("borrar-puntaje");
-const puntajeAnterior = document.getElementById("puntaje-anterior");
+const contenedorProductos = document.getElementById("productos-container");
+const listaCarrito = document.getElementById("lista-carrito");
+const total = document.getElementById("total");
+const tagInput = document.getElementById("tagUsuario");
+const guardarTagBtn = document.getElementById("guardarTag");
+const guardarCotizacionBtn = document.getElementById("guardarCotizacion");
+const historialLista = document.getElementById("lista-historial");
+const vaciarHistorialBtn = document.getElementById("vaciarHistorial");
 
-function mostrarPregunta() {
-  const actual = preguntas[indicePregunta];
-  contenedor.innerHTML = "<h2>" + actual.pregunta + "</h2>";
+function actualizarCarrito() {
+  listaCarrito.innerHTML = "";
+  let sumaTotal = 0;
 
-  actual.opciones.forEach((opcion, i) => {
-    const boton = document.createElement("button");
-    boton.textContent = opcion;
-    boton.className = "opcion";
-    boton.addEventListener("click", () => verificarRespuesta(i));
-    contenedor.appendChild(boton);
+  carrito.forEach((producto) => {
+    const item = document.createElement("li");
+    item.innerHTML = `${producto.nombre} - $${producto.precio}`;
+    listaCarrito.appendChild(item);
+    sumaTotal += producto.precio;
+  });
+
+  total.textContent = `Total: $${sumaTotal}`;
+}
+
+function renderizarProductos(productos) {
+  contenedorProductos.innerHTML = productos
+    .map(
+      (producto) => `
+    <div class="producto">
+      <img src="${producto.imagen}" alt="${producto.nombre}" class="img-producto" />
+      <h3>${producto.nombre}</h3>
+      <p>Precio: $${producto.precio}</p>
+      ${
+        producto.precio > 0
+          ? `<button data-id="${producto.id}">Agregar</button>`
+          : ""
+      }
+    </div>
+  `
+    )
+    .join("");
+
+  contenedorProductos.querySelectorAll("button").forEach((boton) => {
+    boton.addEventListener("click", (e) => {
+      const id = parseInt(e.target.dataset.id);
+      const producto = productos.find((p) => p.id === id);
+      carrito.push(producto);
+      actualizarCarrito();
+      mostrarToast("Producto agregado", "success");
+    });
   });
 }
 
-function verificarRespuesta(indiceSeleccionado) {
-  const correcta = preguntas[indicePregunta].correcta;
-  if (indiceSeleccionado === correcta) {
-    puntaje++;
+function guardarTag() {
+  const tag = tagInput.value.trim();
+  if (!tag) {
+    mostrarToast("Ingresá un tag válido", "error");
+    return;
   }
-
-  indicePregunta++;
-
-  if (indicePregunta < preguntas.length) {
-    mostrarPregunta();
-  } else {
-    mostrarResultado();
-  }
+  usuario = tag;
+  mostrarToast(`Bienvenido, ${usuario}`, "success");
 }
 
-function mostrarResultado() {
-  contenedor.innerHTML = "";
-  resultado.innerHTML =
-    "<h2>🏁 Partida terminada</h2><p>Tu puntaje fue de <strong>" +
-    puntaje +
-    " / " +
-    preguntas.length +
-    "</strong></p>";
-
-  localStorage.setItem("puntajeLOL", puntaje);
-}
-
-function mostrarPuntajeGuardado() {
-  const guardado = localStorage.getItem("puntajeLOL");
-  if (guardado) {
-    puntajeAnterior.innerHTML =
-      "📊 Último puntaje guardado: <strong>" + guardado + "</strong>";
+function guardarCotizacion() {
+  if (!usuario || carrito.length === 0) {
+    mostrarToast("Ingresá tu tag y agregá productos", "error");
+    return;
   }
+
+  const cotizacion = {
+    usuario,
+    productos: [...carrito],
+    fecha: new Date().toLocaleString(),
+  };
+
+  const historial = JSON.parse(localStorage.getItem("historial")) || [];
+  historial.push(cotizacion);
+  localStorage.setItem("historial", JSON.stringify(historial));
+
+  mostrarToast("Cotización guardada", "success");
+  renderizarHistorial();
+  carrito = [];
+  actualizarCarrito();
 }
 
-btnReiniciar.addEventListener("click", () => {
-  indicePregunta = 0;
-  puntaje = 0;
-  resultado.innerHTML = "";
-  mostrarPregunta();
+function renderizarHistorial() {
+  historialLista.innerHTML = "";
+  const historial = JSON.parse(localStorage.getItem("historial")) || [];
+
+  historial.forEach((cotizacion, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${cotizacion.usuario}</strong> - ${cotizacion.fecha} <br>
+      ${cotizacion.productos.map((p) => p.nombre).join(", ")} <br>
+      <button data-index="${index}" class="borrar">Eliminar</button>
+    `;
+    historialLista.appendChild(li);
+  });
+
+  document.querySelectorAll(".borrar").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const index = parseInt(e.target.dataset.index);
+      const historial = JSON.parse(localStorage.getItem("historial")) || [];
+      historial.splice(index, 1);
+      localStorage.setItem("historial", JSON.stringify(historial));
+      renderizarHistorial();
+      mostrarToast("Entrada eliminada", "info");
+    });
+  });
+}
+
+function vaciarHistorial() {
+  localStorage.removeItem("historial");
+  renderizarHistorial();
+  mostrarToast("Historial vaciado", "info");
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  guardarTagBtn.addEventListener("click", guardarTag);
+  guardarCotizacionBtn.addEventListener("click", guardarCotizacion);
+  vaciarHistorialBtn.addEventListener("click", vaciarHistorial);
+
+  try {
+    const productos = await obtenerProductos();
+    renderizarProductos(productos);
+  } catch (err) {
+    mostrarToast("Error al cargar productos", "error");
+  }
+
+  renderizarHistorial();
 });
-
-btnBorrar.addEventListener("click", () => {
-  localStorage.removeItem("puntajeLOL");
-  puntajeAnterior.innerHTML = "";
-});
-
-mostrarPuntajeGuardado();
-mostrarPregunta();

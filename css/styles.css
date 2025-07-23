@@ -1,61 +1,68 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #0d0d0d;
-  color: #fff;
-  text-align: center;
+  font-family: Arial, sans-serif;
+  background-color: #0a0a0a;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #1a1a1a;
   padding: 20px;
+  text-align: center;
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  background: linear-gradient(135deg, #1a0033, #00051a);
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 0 30px #ff00ff88;
-  border: 2px solid #00f0ff;
+main {
+  padding: 20px;
+  display: grid;
+  gap: 20px;
 }
 
-h1, h2 {
-  color: #ff00ff;
-  text-shadow: 0 0 10px #ff00ff;
+#productos-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.producto {
+  background-color: #222;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.producto img {
+  width: 100%;
+  border-radius: 10px;
 }
 
 button {
-  margin: 10px;
-  padding: 12px 25px;
-  background-color: #00f0ff;
-  color: #0d0d0d;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s ease-in-out;
-  box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff inset;
-}
-
-button:hover {
   background-color: #ff00ff;
-  color: #fff;
-  box-shadow: 0 0 12px #ff00ff, 0 0 25px #ff00ff inset;
-}
-
-.opcion {
-  display: block;
-  margin: 15px 0;
-  padding: 15px;
-  background-color: #1a0033;
-  border: 2px solid #00f0ff;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 16px;
+  color: white;
+  border: none;
+  padding: 10px;
   cursor: pointer;
-  transition: 0.2s ease-in-out;
-  box-shadow: 0 0 10px #00f0ff44;
+  margin-top: 10px;
+  border-radius: 5px;
 }
 
-.opcion:hover {
-  background-color: #2a004f;
-  border-color: #ff00ff;
-  box-shadow: 0 0 12px #ff00ff88;
+#carrito, #historial {
+  background-color: #111;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.form-user {
+  margin-bottom: 20px;
+}
+
+.img-producto {
+  width: 100%;
+  max-width: 250px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  object-fit: cover;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
