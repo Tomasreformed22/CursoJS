@@ -1,129 +1,126 @@
 import { obtenerProductos, mostrarToast } from "./fetchData.js";
 
-let carrito = [];
-let usuario = "";
+let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+let cliente = JSON.parse(localStorage.getItem("cliente")) || {};
 
 const contenedorProductos = document.getElementById("productos-container");
 const listaCarrito = document.getElementById("lista-carrito");
 const total = document.getElementById("total");
-const tagInput = document.getElementById("tagUsuario");
-const guardarTagBtn = document.getElementById("guardarTag");
-const guardarCotizacionBtn = document.getElementById("guardarCotizacion");
-const historialLista = document.getElementById("lista-historial");
-const vaciarHistorialBtn = document.getElementById("vaciarHistorial");
+const formularioCliente = document.getElementById("formCliente");
+const confirmarPresupuestoBtn = document.getElementById("confirmarPresupuesto");
+const presupuestoContainer = document.getElementById("presupuesto-container");
+
+function actualizarLocalStorage() {
+  localStorage.setItem("carrito", JSON.stringify(carrito));
+}
 
 function actualizarCarrito() {
   listaCarrito.innerHTML = "";
   let sumaTotal = 0;
 
-  carrito.forEach((producto) => {
-    const item = document.createElement("li");
-    item.innerHTML = `${producto.nombre} - $${producto.precio}`;
-    listaCarrito.appendChild(item);
-    sumaTotal += producto.precio;
+  carrito.forEach((item) => {
+    const subtotal = item.cantidad * item.precio;
+    sumaTotal += subtotal;
+
+    const li = document.createElement("li");
+    li.innerHTML = `${item.nombre} - Cant: ${item.cantidad} - $${item.precio} c/u - Subtotal: $${subtotal}`;
+    listaCarrito.appendChild(li);
   });
 
   total.textContent = `Total: $${sumaTotal}`;
+  actualizarLocalStorage();
 }
 
 function renderizarProductos(productos) {
-  contenedorProductos.innerHTML = productos
-    .map(
-      (producto) => `
-    <div class="producto">
+  contenedorProductos.innerHTML = "";
+
+  productos.forEach((producto) => {
+    const div = document.createElement("div");
+    div.classList.add("producto");
+
+    div.innerHTML = `
       <img src="${producto.imagen}" alt="${producto.nombre}" class="img-producto" />
       <h3>${producto.nombre}</h3>
       <p>Precio: $${producto.precio}</p>
-      ${
-        producto.precio > 0
-          ? `<button data-id="${producto.id}">Agregar</button>`
-          : ""
-      }
-    </div>
-  `
-    )
-    .join("");
+      ${producto.precio > 0 ? `<button data-id="${producto.id}">Agregar</button>` : ""}
+    `;
+
+    contenedorProductos.appendChild(div);
+  });
 
   contenedorProductos.querySelectorAll("button").forEach((boton) => {
     boton.addEventListener("click", (e) => {
       const id = parseInt(e.target.dataset.id);
       const producto = productos.find((p) => p.id === id);
-      carrito.push(producto);
+      const itemEnCarrito = carrito.find((item) => item.id === id);
+
+      if (itemEnCarrito) {
+        itemEnCarrito.cantidad++;
+      } else {
+        carrito.push({ ...producto, cantidad: 1 });
+      }
+
       actualizarCarrito();
       mostrarToast("Producto agregado", "success");
     });
   });
 }
 
-function guardarTag() {
-  const tag = tagInput.value.trim();
-  if (!tag) {
-    mostrarToast("Ingresá un tag válido", "error");
-    return;
-  }
-  usuario = tag;
-  mostrarToast(`Bienvenido, ${usuario}`, "success");
-}
+function guardarDatosCliente(e) {
+  e.preventDefault();
+  const nombre = document.getElementById("nombreCliente").value.trim();
+  const apellido = document.getElementById("apellidoCliente").value.trim();
+  const email = document.getElementById("emailCliente").value.trim();
+  const telefono = document.getElementById("telefonoCliente").value.trim();
+  const direccion = document.getElementById("direccionCliente").value.trim();
 
-function guardarCotizacion() {
-  if (!usuario || carrito.length === 0) {
-    mostrarToast("Ingresá tu tag y agregá productos", "error");
+  if (!nombre || !apellido || !email || !telefono) {
+    mostrarToast("Completá todos los campos obligatorios", "error");
     return;
   }
 
-  const cotizacion = {
-    usuario,
-    productos: [...carrito],
-    fecha: new Date().toLocaleString(),
-  };
-
-  const historial = JSON.parse(localStorage.getItem("historial")) || [];
-  historial.push(cotizacion);
-  localStorage.setItem("historial", JSON.stringify(historial));
-
-  mostrarToast("Cotización guardada", "success");
-  renderizarHistorial();
-  carrito = [];
-  actualizarCarrito();
+  cliente = { nombre, apellido, email, telefono, direccion };
+  localStorage.setItem("cliente", JSON.stringify(cliente));
+  mostrarToast("Datos guardados", "success");
 }
 
-function renderizarHistorial() {
-  historialLista.innerHTML = "";
-  const historial = JSON.parse(localStorage.getItem("historial")) || [];
+function confirmarPresupuesto() {
+  if (carrito.length === 0 || !cliente.nombre) {
+    mostrarToast("Completá tus datos y agregá productos", "error");
+    return;
+  }
 
-  historial.forEach((cotizacion, index) => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${cotizacion.usuario}</strong> - ${cotizacion.fecha} <br>
-      ${cotizacion.productos.map((p) => p.nombre).join(", ")} <br>
-      <button data-index="${index}" class="borrar">Eliminar</button>
-    `;
-    historialLista.appendChild(li);
+  let detalle = `
+    <h3>Presupuesto para ${cliente.nombre} ${cliente.apellido}</h3>
+    <p>Email: ${cliente.email}</p>
+    <p>Teléfono: ${cliente.telefono}</p>
+    <p>Dirección: ${cliente.direccion}</p>
+  `;
+
+  let totalPresupuesto = 0;
+  detalle += "<ul>";
+  carrito.forEach((item) => {
+    const subtotal = item.cantidad * item.precio;
+    detalle += `<li>${item.nombre} - ${item.cantidad} x $${item.precio} = $${subtotal}</li>`;
+    totalPresupuesto += subtotal;
   });
+  detalle += "</ul>";
 
-  document.querySelectorAll(".borrar").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      const index = parseInt(e.target.dataset.index);
-      const historial = JSON.parse(localStorage.getItem("historial")) || [];
-      historial.splice(index, 1);
-      localStorage.setItem("historial", JSON.stringify(historial));
-      renderizarHistorial();
-      mostrarToast("Entrada eliminada", "info");
-    });
-  });
+  const fechaEmision = new Date();
+  const fechaVencimiento = new Date(fechaEmision.getTime() + 72 * 60 * 60 * 1000);
+
+  detalle += `<p>Total: $${totalPresupuesto}</p>`;
+  detalle += `<p>Emitido: ${fechaEmision.toLocaleString()}</p>`;
+  detalle += `<p>Válido hasta: ${fechaVencimiento.toLocaleString()}</p>`;
+
+  presupuestoContainer.innerHTML = detalle;
+  mostrarToast("Presupuesto generado", "success");
 }
 
-function vaciarHistorial() {
-  localStorage.removeItem("historial");
-  renderizarHistorial();
-  mostrarToast("Historial vaciado", "info");
-}
+formularioCliente.addEventListener("submit", guardarDatosCliente);
+confirmarPresupuestoBtn.addEventListener("click", confirmarPresupuesto);
 
-document.addEventListener("DOMContentLoaded", async () => {
-  guardarTagBtn.addEventListener("click", guardarTag);
-  guardarCotizacionBtn.addEventListener("click", guardarCotizacion);
-  vaciarHistorialBtn.addEventListener("click", vaciarHistorial);
-
+(async () => {
   try {
     const productos = await obtenerProductos();
     renderizarProductos(productos);
@@ -131,5 +128,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     mostrarToast("Error al cargar productos", "error");
   }
 
-  renderizarHistorial();
-});
+  actualizarCarrito();
+})();

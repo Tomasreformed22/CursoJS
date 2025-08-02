@@ -1,40 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PeriferiCotizador</title>
-  <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Cotización</title>
+  <link rel="stylesheet" href="css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/toastify-js" defer></script>
-  <script type="module" src="js/main.js" defer></script>
   <script type="module" src="js/main.js" defer></script>
 </head>
 <body>
   <header>
-    <h1>Simulador de Cotización de Periféricos</h1>
+    <h1>Simulador de Cotización</h1>
   </header>
 
-  <main>
-    <div class="form-user">
-      <input type="text" id="tagUsuario" placeholder="Ingresá tu nombre o tag">
-      <button id="guardarTag">Confirmar</button>
-    </div>
+  <section id="form-section">
+    <h2>Datos del Cliente</h2>
+    <form id="formCliente">
+      <label for="nombreCliente">Nombre:</label>
+      <input type="text" id="nombreCliente" required>
 
-    <section id="productos-container"></section>
+      <label for="apellidoCliente">Apellido:</label>
+      <input type="text" id="apellidoCliente" required>
 
-    <section id="carrito">
-      <h2>Tu Cotización</h2>
-      <ul id="lista-carrito"></ul>
-      <p id="total"></p>
-      <button id="guardarCotizacion">Guardar Cotización</button>
-    </section>
+      <label for="emailCliente">Email:</label>
+      <input type="email" id="emailCliente" required>
 
-    <section id="historial">
-      <h2>Historial de Cotizaciones</h2>
-      <ul id="lista-historial"></ul>
-      <button id="vaciarHistorial">Vaciar Historial</button>
-    </section>
-  </main>
+      <label for="telefonoCliente">Teléfono:</label>
+      <input type="tel" id="telefonoCliente" required>
+
+      <label for="direccionCliente">Dirección:</label>
+      <input type="text" id="direccionCliente">
+
+      <button type="submit">Guardar Datos</button>
+    </form>
+  </section>
+
+  <section id="productos-section">
+    <h2>Productos</h2>
+    <div id="productos-container"></div>
+  </section>
+
+  <section id="carrito-section">
+    <h2>Tu Cotización</h2>
+    <ul id="lista-carrito"></ul>
+    <p id="total">Total: $0</p>
+  </section>
+
+  <button id="confirmarPresupuesto">Confirmar Presupuesto</button>
+
+  <section id="presupuesto-section">
+    <h2>Presupuesto Generado</h2>
+    <div id="presupuesto-container"></div>
+  </section>
+
 </body>
 </html>
